@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register | My Blog</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">✦ My Blog</a>
+
+    <nav aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="create.html">Create Blog</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
+  <main class="container auth-layout">
+    <div class="auth-intro register-art">
+
+      <span class="eyebrow">WELCOME TO MY BLOG</span>
+      <h1>Share your story<br>with the world.</h1>
+      <p>Create an account to start writing and exploring ideas.</p>
+    </div>
+
+    <form class="card demo-auth auth-card">
+      <h2>Create an account</h2>
+      <p class="muted">Fill in your details to get started.</p>
+
+      <label for="name">Name</label>
+      <input id="name" name="name" placeholder="Your name" required>
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email"
+             placeholder="you@example.com" required>
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password"
+             placeholder="At least 8 characters" minlength="8" required>
+
+      <button type="submit">Create account</button>
+      <p class="form-message" role="status"></p>
+      <p class="form-footer">
+        Already registered? <a href="login.html">Log in</a>
+      </p>
+    </form>
+  </main>
+</body>
+</html>
+

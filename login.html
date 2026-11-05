@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | My Blog</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">My Blog</a>
+    <nav aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="create.html">Create Blog</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
+ <main class="container auth-layout">
+  <div class="auth-intro login-art">
+    <span class="eyebrow">👋 WELCOME BACK</span>
+    <h1>Your next story<br>is waiting.</h1>
+    <p>Sign in and continue your writing journey. ✨</p>
+  </div>
+
+  <form class="card demo-auth auth-card">
+    <h2>Login to My Blog</h2>
+    <p class="muted">Good to see you again!</p>
+
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email"
+           placeholder="you@example.com" required>
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password"
+           placeholder="Your password" required>
+
+    <button type="submit">Login →</button>
+    <p class="form-message" role="status"></p>
+
+    <p class="form-footer">
+      New here? <a href="register.html">Create an account</a>
+    </p>
+  </form>
+</main>
+
+</body>
+</html>

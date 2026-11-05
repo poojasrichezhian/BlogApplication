@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Blog | My Blog</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">✦ My Blog</a>
+
+    <nav aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="create.html">Create Blog</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="page-hero create-hero">
+  <span class="eyebrow">✍️ CREATE SOMETHING GREAT</span>
+  <h1>Every story starts somewhere.</h1>
+  <p>Put your thoughts into words and share your next blog. 💡</p>
+</section>
+
+    <span class="eyebrow">YOUR WRITING SPACE</span>
+    <h1>Create a blog</h1>
+    <p class="muted">Have an idea? Write it down and share it here.</p>
+
+    <form id="create-form" class="card">
+      <label for="title">Blog title</label>
+      <input
+        id="title"
+        name="title"
+        type="text"
+        placeholder="Give your blog a great title"
+        maxlength="100"
+        required
+      >
+
+      <label for="content">Your story</label>
+      <textarea
+        id="content"
+        name="content"
+        rows="10"
+        placeholder="Start writing your blog..."
+        required
+      ></textarea>
+
+      <button type="submit">Publish blog →</button>
+    </form>
+  </main>
+</body>
+</html>
+
