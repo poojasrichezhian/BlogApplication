@@ -1,71 +1,256 @@
-const storageKey = "blog-app-posts";
+const API_URL = "http://localhost:5000/api";
 
-function getPosts() {
-  return JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+// =====================================
+// 1. USER REGISTRATION AND LOGIN
+// =====================================
+
+document.querySelectorAll(".demo-auth").forEach((form) => {
+
+    form.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const message = form.querySelector(".form-message");
+
+        const name = form.elements.name?.value.trim();
+        const email = form.elements.email.value.trim();
+        const password = form.elements.password.value;
+
+        const isRegister = Boolean(name);
+
+        const endpoint = isRegister
+            ? "/auth/register"
+            : "/auth/login";
+
+        const requestBody = isRegister
+            ? { name, email, password }
+            : { email, password };
+
+        try {
+
+            message.textContent = "Please wait...";
+
+            const response = await fetch(API_URL + endpoint, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(requestBody)
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+
+            if (isRegister) {
+
+                message.textContent =
+                    "Registration successful! Please login.";
+
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 1500);
+
+            } else {
+
+                localStorage.setItem("blog-token", data.token);
+
+                localStorage.setItem(
+                    "blog-user",
+                    JSON.stringify(data.user)
+                );
+
+                message.textContent = "Login successful!";
+
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 1000);
+
+            }
+
+        } catch (error) {
+
+            message.textContent = error.message;
+
+        }
+
+    });
+
+});
+
+
+// =====================================
+// 2. DISPLAY ALL BLOGS
+// =====================================
+
+async function showPosts() {
+
+    const container = document.querySelector("#posts");
+
+    if (!container) return;
+
+    container.textContent = "Loading blogs...";
+
+    try {
+
+        const response = await fetch(API_URL + "/blogs");
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message);
+        }
+
+        container.innerHTML = "";
+
+        const posts = data.blogs;
+
+        if (posts.length === 0) {
+
+            container.textContent =
+                "No blogs yet. Create the first one!";
+
+            return;
+        }
+
+        posts.forEach((post) => {
+
+            const article = document.createElement("article");
+
+            article.className = "card";
+
+            const image = document.createElement("img");
+
+            image.className = "post-image";
+
+            image.src =
+                `https://picsum.photos/seed/${encodeURIComponent(post.title)}/800/450`;
+
+            image.alt = "Decorative blog cover";
+
+            image.loading = "lazy";
+
+
+            const title = document.createElement("h2");
+
+            title.textContent = post.title;
+
+
+            const date = document.createElement("small");
+
+            date.textContent =
+                new Date(post.createdAt).toLocaleDateString();
+
+
+            const content = document.createElement("p");
+
+            content.textContent = post.content;
+
+
+            const author = document.createElement("small");
+
+            author.textContent = "By " + post.author;
+
+
+            article.append(
+                image,
+                title,
+                date,
+                content,
+                author
+            );
+
+            container.append(article);
+
+        });
+
+    } catch (error) {
+
+        container.textContent =
+            "Unable to load blogs: " + error.message;
+
+    }
+
 }
 
-function showPosts() {
-  const container = document.querySelector("#posts");
-  if (!container) return;
 
-  const posts = getPosts();
-  if (posts.length === 0) {
-    container.textContent = "No blogs yet. Create the first one!";
-    return;
-  }
-
-  posts.forEach((post) => {
-    const article = document.createElement("article");
-    article.className = "card";
-    const image = document.createElement("img");
-    image.className = "post-image";
-    image.src = `https://picsum.photos/seed/${encodeURIComponent(post.title)}/800/450`;
-    image.alt = "Decorative blog cover";
-    image.loading = "lazy";
-
-
-    const title = document.createElement("h2");
-    title.textContent = post.title;
-
-    const date = document.createElement("small");
-    date.textContent = post.date;
-
-    const content = document.createElement("p");
-    content.textContent = post.content;
-
-    article.append(image, title, date, content);
-
-    container.append(article);
-  });
-}
+// =====================================
+// 3. CREATE NEW BLOG
+// =====================================
 
 const createForm = document.querySelector("#create-form");
 
 if (createForm) {
-  createForm.addEventListener("submit", (event) => {
-    event.preventDefault();
 
-    const post = {
-      title: createForm.elements.title.value.trim(),
-      content: createForm.elements.content.value.trim(),
-      date: new Date().toLocaleDateString()
-    };
+    createForm.addEventListener("submit", async (event) => {
 
-    if (!post.title || !post.content) return;
+        event.preventDefault();
 
-    const posts = getPosts();
-    posts.unshift(post);
-    localStorage.setItem(storageKey, JSON.stringify(posts));
-    window.location.href = "dashboard.html";
-  });
+        const token = localStorage.getItem("blog-token");
+
+        if (!token) {
+
+            alert("Please login first!");
+
+            window.location.href = "login.html";
+
+            return;
+        }
+
+        const title = createForm.elements.title.value.trim();
+
+        const content = createForm.elements.content.value.trim();
+
+        if (!title || !content) return;
+
+        try {
+
+            const response = await fetch(API_URL + "/blogs", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+
+                body: JSON.stringify({
+                    title,
+                    content
+                })
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+
+            alert("Blog published successfully!");
+
+            window.location.href = "dashboard.html";
+
+        } catch (error) {
+
+            alert(error.message);
+
+        }
+
+    });
+
 }
 
-document.querySelectorAll(".demo-auth").forEach((form) => {
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    form.querySelector(".form-message").textContent =
-      "This is a frontend demo. Account authentication is not connected yet.";
-  });
-});
+
+// =====================================
+// 4. LOAD BLOGS WHEN PAGE OPENS
+// =====================================
 
 showPosts();
