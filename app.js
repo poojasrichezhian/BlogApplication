@@ -98,9 +98,22 @@ async function showPosts() {
 
     container.textContent = "Loading blogs...";
 
+    // Read the search box and category filter (if they exist on this page)
+    const search = document.querySelector("#search-input")?.value.trim() || "";
+
+    const category = document.querySelector("#category-filter")?.value || "All";
+
+    const params = new URLSearchParams();
+
+    if (search) params.set("search", search);
+
+    if (category !== "All") params.set("category", category);
+
+    const query = params.toString() ? "?" + params.toString() : "";
+
     try {
 
-        const response = await fetch(API_URL + "/blogs");
+        const response = await fetch(API_URL + "/blogs" + query);
 
         const data = await response.json();
 
@@ -114,8 +127,9 @@ async function showPosts() {
 
         if (posts.length === 0) {
 
-            container.textContent =
-                "No blogs yet. Create the first one!";
+            container.textContent = (search || category !== "All")
+                ? "No blogs match your search."
+                : "No blogs yet. Create the first one!";
 
             return;
         }
@@ -156,6 +170,13 @@ async function showPosts() {
                 new Date(post.createdAt).toLocaleDateString();
 
 
+            const tag = document.createElement("span");
+
+            tag.className = "category-tag";
+
+            tag.textContent = post.category || "General";
+
+
             const content = document.createElement("p");
 
             content.textContent = post.content;
@@ -177,6 +198,7 @@ async function showPosts() {
 
             article.append(
                 image,
+                tag,
                 title,
                 date,
                 content,
@@ -204,6 +226,15 @@ async function showPosts() {
 
 const createForm = document.querySelector("#create-form");
 
+// If the address has ?id=..., this page is in EDIT mode
+const editId = new URLSearchParams(window.location.search).get("id");
+
+if (createForm && editId) {
+
+    loadBlogForEditing(createForm, editId);
+
+}
+
 if (createForm) {
 
     createForm.addEventListener("submit", async (event) => {
@@ -225,13 +256,20 @@ if (createForm) {
 
         const content = createForm.elements.content.value.trim();
 
+        const category = createForm.elements.category.value;
+
         if (!title || !content) return;
 
         try {
 
-            const response = await fetch(API_URL + "/blogs", {
+            // EDIT mode: update the blog (PUT). CREATE mode: new blog (POST)
+            const url = editId
+                ? API_URL + "/blogs/" + editId
+                : API_URL + "/blogs";
 
-                method: "POST",
+            const response = await fetch(url, {
+
+                method: editId ? "PUT" : "POST",
 
                 headers: {
                     "Content-Type": "application/json",
@@ -240,7 +278,8 @@ if (createForm) {
 
                 body: JSON.stringify({
                     title,
-                    content
+                    content,
+                    category
                 })
 
             });
@@ -251,9 +290,19 @@ if (createForm) {
                 throw new Error(data.message);
             }
 
-            alert("Blog published successfully!");
+            if (editId) {
 
-            window.location.href = "dashboard.html";
+                alert("Blog updated successfully!");
+
+                window.location.href = "blog-details.html?id=" + editId;
+
+            } else {
+
+                alert("Blog published successfully!");
+
+                window.location.href = "dashboard.html";
+
+            }
 
         } catch (error) {
 
@@ -314,6 +363,13 @@ async function showBlogDetails() {
         image.alt = "Decorative blog cover";
 
 
+        const tag = document.createElement("span");
+
+        tag.className = "category-tag";
+
+        tag.textContent = post.category || "General";
+
+
         const title = document.createElement("h1");
 
         title.textContent = post.title;
@@ -342,7 +398,42 @@ async function showBlogDetails() {
         back.textContent = "← Back to all blogs";
 
 
-        container.append(image, title, meta, content, back);
+        container.append(image, tag, title, meta, content);
+
+        // Show Edit and Delete buttons only to the blog's author
+        const currentUser = JSON.parse(localStorage.getItem("blog-user") || "null");
+
+        if (currentUser && currentUser.id === post.authorId) {
+
+            const actions = document.createElement("div");
+
+            actions.className = "blog-actions";
+
+            const editButton = document.createElement("a");
+
+            editButton.className = "edit-button";
+
+            editButton.href = "create.html?id=" + post._id;
+
+            editButton.textContent = "✏️ Edit";
+
+            const deleteButton = document.createElement("button");
+
+            deleteButton.className = "delete-button";
+
+            deleteButton.type = "button";
+
+            deleteButton.textContent = "🗑️ Delete";
+
+            deleteButton.addEventListener("click", () => deleteBlog(post._id));
+
+            actions.append(editButton, deleteButton);
+
+            container.append(actions);
+
+        }
+
+        container.append(back);
 
     } catch (error) {
 
@@ -355,9 +446,128 @@ async function showBlogDetails() {
 
 
 // =====================================
-// 5. LOAD BLOGS WHEN PAGE OPENS
+// 5. EDIT BLOG: fill the form with the existing blog
+// =====================================
+
+async function loadBlogForEditing(form, blogId) {
+
+    document.querySelector("#form-heading").textContent = "Edit your blog";
+
+    document.querySelector("#form-button").textContent = "Save changes →";
+
+    document.title = "Edit Blog | My Blog";
+
+    try {
+
+        const response = await fetch(API_URL + "/blogs/" + blogId);
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message);
+        }
+
+        form.elements.title.value = data.blog.title;
+
+        form.elements.content.value = data.blog.content;
+
+        form.elements.category.value = data.blog.category || "General";
+
+    } catch (error) {
+
+        alert("Unable to load blog: " + error.message);
+
+    }
+
+}
+
+
+// =====================================
+// 6. DELETE BLOG
+// =====================================
+
+async function deleteBlog(blogId) {
+
+    const sure = confirm("Are you sure you want to delete this blog?");
+
+    if (!sure) return;
+
+    const token = localStorage.getItem("blog-token");
+
+    if (!token) {
+
+        alert("Please login first!");
+
+        window.location.href = "login.html";
+
+        return;
+    }
+
+    try {
+
+        const response = await fetch(API_URL + "/blogs/" + blogId, {
+
+            method: "DELETE",
+
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message);
+        }
+
+        alert("Blog deleted successfully!");
+
+        window.location.href = "dashboard.html";
+
+    } catch (error) {
+
+        alert(error.message);
+
+    }
+
+}
+
+
+// =====================================
+// 7. LOAD BLOGS WHEN PAGE OPENS
 // =====================================
 
 showPosts();
 
 showBlogDetails();
+
+
+// =====================================
+// 8. SEARCH AND CATEGORY FILTER (Dashboard)
+// =====================================
+
+const searchInput = document.querySelector("#search-input");
+
+const categoryFilter = document.querySelector("#category-filter");
+
+let searchTimer;
+
+if (searchInput) {
+
+    // Wait until the user stops typing for 0.4 seconds, then search
+    searchInput.addEventListener("input", () => {
+
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(showPosts, 400);
+
+    });
+
+}
+
+if (categoryFilter) {
+
+    categoryFilter.addEventListener("change", showPosts);
+
+}

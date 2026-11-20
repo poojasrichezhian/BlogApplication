@@ -12,6 +12,12 @@ const blogSchema = new mongoose.Schema(
             type: String,
             required: [true, "Content is required"]
         },
+        // Blog category (used for filtering)
+        category: {
+            type: String,
+            enum: ["General", "Technology", "Travel", "Food", "Lifestyle", "Education", "Health"],
+            default: "General"
+        },
         // Author's name (shown on the frontend as "By ...")
         author: {
             type: String,

@@ -13,6 +13,9 @@ The application uses a frontend built with HTML, CSS, and JavaScript, connected 
 - User registration and login pages.
 - Dashboard to view published blogs.
 - Blog details page to read a single blog.
+- Edit and delete buttons (shown only to the blog's author).
+- Search blogs by title or content.
+- Blog categories with a category filter on the dashboard.
 - Create and publish new blog posts.
 - User-friendly interface.
 - Integration with backend APIs.
@@ -22,7 +25,7 @@ The application uses a frontend built with HTML, CSS, and JavaScript, connected 
 - Password hashing using bcrypt.js.
 - JWT-based authentication.
 - Protected blog creation endpoint.
-- API to retrieve all blog posts.
+- API to retrieve all blog posts, with optional search and category filters.
 - API to retrieve a single blog by ID.
 - Update and delete APIs (only the blog's author can change it).
 - MongoDB Atlas database with Mongoose models (User, Blog).
@@ -155,11 +158,13 @@ The frontend communicates with the backend running at `http://localhost:5000`.
 | GET | `/api/test` | Test backend API | Not required |
 | POST | `/api/auth/register` | Register a new user | Not required |
 | POST | `/api/auth/login` | Log in an existing user | Not required |
-| GET | `/api/blogs` | Retrieve all blogs | Not required |
+| GET | `/api/blogs` | Retrieve all blogs (optional `?search=` and `?category=`) | Not required |
 | POST | `/api/blogs` | Create a new blog | JWT required |
 | GET | `/api/blogs/:id` | Retrieve a single blog by ID | Not required |
 | PUT | `/api/blogs/:id` | Update a blog (author only) | JWT required |
 | DELETE | `/api/blogs/:id` | Delete a blog (author only) | JWT required |
+
+Available blog categories: General, Technology, Travel, Food, Lifestyle, Education, Health.
 
 ## Authentication
 
@@ -190,6 +195,11 @@ The following functionalities have been tested successfully:
 - Invalid blog ID returns "Blog not found".
 - Blog details page in the browser.
 - Full website flow: register, login, create blog, view dashboard, view blog details.
+- Editing a blog from the website (author only).
+- Deleting a blog from the website (author only).
+- Edit and delete buttons hidden for blogs written by other users.
+- Creating blogs with categories.
+- Searching blogs and filtering by category.
 
 ## Current Limitations
 
@@ -198,7 +208,6 @@ The following functionalities have been tested successfully:
 
 ## Future Enhancements
 
-- Edit and delete buttons on the frontend (the APIs already exist).
 - User profile management.
 - Logout functionality.
 - Deployment of the frontend and backend.

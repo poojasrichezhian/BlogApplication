@@ -4,10 +4,16 @@ const Blog = require("../models/Blog");
 // Helper: check that an ID looks like a valid MongoDB ID
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
+// Allowed blog categories
+const CATEGORIES = ["General", "Technology", "Travel", "Food", "Lifestyle", "Education", "Health"];
+
+// Helper: make search text safe to use inside a search pattern
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 // Create Blog (login required)
 const createBlog = async (req, res) => {
     try {
-        const { title, content } = req.body;
+        const { title, content, category } = req.body;
 
         if (!title || !content) {
             return res.status(400).json({
@@ -16,9 +22,17 @@ const createBlog = async (req, res) => {
             });
         }
 
+        if (category && !CATEGORIES.includes(category)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid category"
+            });
+        }
+
         const newBlog = await Blog.create({
             title,
             content,
+            category: category || "General",
             author: req.user.name,
             authorId: req.user.id
         });
@@ -40,9 +54,31 @@ const createBlog = async (req, res) => {
 };
 
 // Get All Blogs (newest first)
+// Optional filters: /api/blogs?search=word&category=Travel
 const getBlogs = async (req, res) => {
     try {
-        const blogs = await Blog.find().sort({ createdAt: -1 });
+        const { search, category } = req.query;
+
+        const filter = {};
+
+        // Search in title OR content (not case-sensitive)
+        if (search && search.trim()) {
+            const pattern = new RegExp(escapeRegex(search.trim()), "i");
+            filter.$or = [
+                { title: pattern },
+                { content: pattern }
+            ];
+        }
+
+        // Filter by category
+        if (category && category !== "All") {
+            // Older blogs without a category count as "General"
+            filter.category = category === "General"
+                ? { $in: ["General", null] }
+                : category;
+        }
+
+        const blogs = await Blog.find(filter).sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
@@ -100,7 +136,7 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content } = req.body;
+        const { title, content, category } = req.body;
 
         if (!isValidId(id)) {
             return res.status(404).json({
@@ -125,8 +161,16 @@ const updateBlog = async (req, res) => {
             });
         }
 
+        if (category && !CATEGORIES.includes(category)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid category"
+            });
+        }
+
         if (title) blog.title = title;
         if (content) blog.content = content;
+        if (category) blog.category = category;
 
         await blog.save();
 

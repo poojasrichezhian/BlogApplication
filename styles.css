@@ -396,3 +396,97 @@ button:hover {
   line-height: 1.8;
   white-space: pre-wrap;
 }
+
+/* ===== Edit & Delete buttons (Module 04) ===== */
+.blog-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.edit-button,
+.delete-button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.edit-button {
+  background: #6d4aff;
+  color: #fff;
+}
+
+.delete-button {
+  width: auto;
+  margin-top: 0;
+  background: #e5484d;
+  color: #fff;
+  border: none;
+  font-family: inherit;
+}
+
+.edit-button:hover,
+.delete-button:hover {
+  opacity: 0.9;
+}
+
+/* ===== Search, Category filter & Category tag (Module 04) ===== */
+select {
+  display: block;
+  width: 100%;
+  padding: 14px 15px;
+  font: inherit;
+  color: #172033;
+  background: #fafaff;
+  border: 1px solid #dcdbea;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: 2px solid #a89cf5;
+  border-color: #6545d8;
+}
+
+.blog-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.blog-filters input {
+  flex: 2;
+}
+
+.blog-filters select {
+  flex: 1;
+}
+
+.category-tag {
+  display: inline-block;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6545d8;
+  background: #efebff;
+  border-radius: 999px;
+}
+
+@media (max-width: 600px) {
+  .blog-filters {
+    flex-direction: column;
+  }
+}
+
+/* Line up the category tag and "Read more" with the card text */
+.post-grid .card .category-tag,
+.post-grid .card .read-more {
+  margin-left: 22px;
+  margin-right: 22px;
+}

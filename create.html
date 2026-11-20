@@ -28,7 +28,7 @@
 </section>
 
     <span class="eyebrow">YOUR WRITING SPACE</span>
-    <h1>Create a blog</h1>
+    <h1 id="form-heading">Create a blog</h1>
     <p class="muted">Have an idea? Write it down and share it here.</p>
 
     <form id="create-form" class="card">
@@ -42,6 +42,17 @@
         required
       >
 
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        <option value="General">General</option>
+        <option value="Technology">Technology</option>
+        <option value="Travel">Travel</option>
+        <option value="Food">Food</option>
+        <option value="Lifestyle">Lifestyle</option>
+        <option value="Education">Education</option>
+        <option value="Health">Health</option>
+      </select>
+
       <label for="content">Your story</label>
       <textarea
         id="content"
@@ -51,7 +62,7 @@
         required
       ></textarea>
 
-      <button type="submit">Publish blog →</button>
+      <button id="form-button" type="submit">Publish blog →</button>
     </form>
   </main>
 </body>
