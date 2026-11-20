@@ -53,13 +53,12 @@ const createBlog = async (req, res) => {
     }
 };
 
-// Get All Blogs (newest first)
-// Optional filters: /api/blogs?search=word&category=Travel
-const getBlogs = async (req, res) => {
-    try {
-        const { search, category } = req.query;
+// Helper: build the search + category filter from the address
+// e.g. /api/blogs?search=word&category=Travel
+const buildFilter = (query) => {
+    const { search, category } = query;
 
-        const filter = {};
+    const filter = {};
 
         // Search in title OR content (not case-sensitive)
         if (search && search.trim()) {
@@ -78,6 +77,14 @@ const getBlogs = async (req, res) => {
                 : category;
         }
 
+    return filter;
+};
+
+// Get All Blogs (newest first) - public, used on the Home page
+const getBlogs = async (req, res) => {
+    try {
+        const filter = buildFilter(req.query);
+
         const blogs = await Blog.find(filter).sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -88,6 +95,31 @@ const getBlogs = async (req, res) => {
 
     } catch (error) {
         console.error("Get blogs error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+    }
+};
+
+// Get only the logged-in user's blogs - used on the Dashboard
+const getMyBlogs = async (req, res) => {
+    try {
+        const filter = buildFilter(req.query);
+
+        filter.authorId = req.user.id;
+
+        const blogs = await Blog.find(filter).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: blogs.length,
+            blogs
+        });
+
+    } catch (error) {
+        console.error("Get my blogs error:", error);
 
         res.status(500).json({
             success: false,
@@ -238,6 +270,7 @@ const deleteBlog = async (req, res) => {
 module.exports = {
     createBlog,
     getBlogs,
+    getMyBlogs,
     getBlogById,
     updateBlog,
     deleteBlog

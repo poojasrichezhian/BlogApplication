@@ -2,6 +2,139 @@ const API_URL = "http://localhost:5000/api";
 
 
 // =====================================
+// 0. LOGIN HELPERS, LOGOUT, NAVIGATION & PAGE PROTECTION (Module 05)
+// =====================================
+
+// Read the saved JWT token
+function getToken() {
+
+    return localStorage.getItem("blog-token");
+
+}
+
+// Check if the token exists and has not expired
+function isLoggedIn() {
+
+    const token = getToken();
+
+    if (!token) return false;
+
+    try {
+
+        // The middle part of a JWT contains the data (including "exp" = expiry time)
+        const payload = JSON.parse(
+            atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+        );
+
+        return payload.exp * 1000 > Date.now();
+
+    } catch (error) {
+
+        return false;
+
+    }
+
+}
+
+// Logout: remove the saved token and user, then go to the Login page
+function logout(message) {
+
+    localStorage.removeItem("blog-token");
+
+    localStorage.removeItem("blog-user");
+
+    if (message) alert(message);
+
+    window.location.href = "login.html";
+
+}
+
+// If the server says the token is invalid/expired (401), log the user out
+function handleUnauthorized(response) {
+
+    if (response.status === 401) {
+
+        logout("Your session has expired. Please login again.");
+
+        return true;
+    }
+
+    return false;
+
+}
+
+// Protect private pages: <body data-private="true">
+if (document.body.dataset.private === "true" && !isLoggedIn()) {
+
+    localStorage.removeItem("blog-token");
+
+    localStorage.removeItem("blog-user");
+
+    alert("Please login to continue.");
+
+    window.location.replace("login.html");
+
+}
+
+// Update the navigation bar depending on login status
+function updateNavigation() {
+
+    const nav = document.querySelector(".site-header nav");
+
+    if (!nav) return;
+
+    const loggedIn = isLoggedIn();
+
+    nav.querySelectorAll("a").forEach((link) => {
+
+        const page = link.getAttribute("href");
+
+        // Logged in: hide Login and Register
+        if (loggedIn && (page === "login.html" || page === "register.html")) {
+            link.style.display = "none";
+        }
+
+        // Logged out: hide private pages
+        if (!loggedIn && (page === "dashboard.html" || page === "create.html")) {
+            link.style.display = "none";
+        }
+
+    });
+
+    if (loggedIn) {
+
+        const profileLink = document.createElement("a");
+
+        profileLink.href = "profile.html";
+
+        profileLink.textContent = "Profile";
+
+        const logoutLink = document.createElement("a");
+
+        logoutLink.href = "#";
+
+        logoutLink.className = "logout-link";
+
+        logoutLink.textContent = "Logout";
+
+        logoutLink.addEventListener("click", (event) => {
+
+            event.preventDefault();
+
+            logout();
+
+        });
+
+        nav.append(profileLink, logoutLink);
+
+    }
+
+}
+
+updateNavigation();
+
+
+// =====================================
 // 1. USER REGISTRATION AND LOGIN
 // =====================================
 
@@ -111,9 +244,21 @@ async function showPosts() {
 
     const query = params.toString() ? "?" + params.toString() : "";
 
+    // Dashboard (data-mine="true") shows only MY blogs; Home shows all blogs
+    const onlyMine = container.dataset.mine === "true";
+
+    // Not logged in: the page is already redirecting to Login
+    if (onlyMine && !isLoggedIn()) return;
+
     try {
 
-        const response = await fetch(API_URL + "/blogs" + query);
+        const response = onlyMine
+            ? await fetch(API_URL + "/blogs/my" + query, {
+                headers: { "Authorization": "Bearer " + getToken() }
+            })
+            : await fetch(API_URL + "/blogs" + query);
+
+        if (onlyMine && handleUnauthorized(response)) return;
 
         const data = await response.json();
 
@@ -129,7 +274,9 @@ async function showPosts() {
 
             container.textContent = (search || category !== "All")
                 ? "No blogs match your search."
-                : "No blogs yet. Create the first one!";
+                : onlyMine
+                    ? "You haven't written any blogs yet. Click \"Write a new blog\" to start!"
+                    : "No blogs yet. Create the first one!";
 
             return;
         }
@@ -284,6 +431,8 @@ if (createForm) {
 
             });
 
+            if (handleUnauthorized(response)) return;
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -403,7 +552,7 @@ async function showBlogDetails() {
         // Show Edit and Delete buttons only to the blog's author
         const currentUser = JSON.parse(localStorage.getItem("blog-user") || "null");
 
-        if (currentUser && currentUser.id === post.authorId) {
+        if (isLoggedIn() && currentUser && currentUser.id === post.authorId) {
 
             const actions = document.createElement("div");
 
@@ -515,6 +664,8 @@ async function deleteBlog(blogId) {
 
         });
 
+        if (handleUnauthorized(response)) return;
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -544,7 +695,108 @@ showBlogDetails();
 
 
 // =====================================
-// 8. SEARCH AND CATEGORY FILTER (Dashboard)
+// 8. PROFILE PAGE
+// =====================================
+
+async function showProfile() {
+
+    const container = document.querySelector("#profile");
+
+    if (!container || !isLoggedIn()) return;
+
+    container.textContent = "Loading profile...";
+
+    try {
+
+        const response = await fetch(API_URL + "/auth/me", {
+            headers: { "Authorization": "Bearer " + getToken() }
+        });
+
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message);
+        }
+
+        const user = data.user;
+
+        container.innerHTML = "";
+
+        const avatar = document.createElement("div");
+
+        avatar.className = "profile-avatar";
+
+        avatar.textContent = user.name.charAt(0).toUpperCase();
+
+        const name = document.createElement("h1");
+
+        name.textContent = user.name;
+
+        const details = document.createElement("dl");
+
+        details.className = "profile-details";
+
+        const rows = [
+            ["📧 Email", user.email],
+            ["📅 Joined", new Date(user.joinedAt).toLocaleDateString()],
+            ["📝 Blogs written", user.blogCount]
+        ];
+
+        rows.forEach(([label, value]) => {
+
+            const dt = document.createElement("dt");
+
+            dt.textContent = label;
+
+            const dd = document.createElement("dd");
+
+            dd.textContent = value;
+
+            details.append(dt, dd);
+
+        });
+
+        const actions = document.createElement("div");
+
+        actions.className = "blog-actions";
+
+        const myBlogs = document.createElement("a");
+
+        myBlogs.className = "edit-button";
+
+        myBlogs.href = "dashboard.html";
+
+        myBlogs.textContent = "📚 My blogs";
+
+        const logoutButton = document.createElement("button");
+
+        logoutButton.className = "delete-button";
+
+        logoutButton.type = "button";
+
+        logoutButton.textContent = "🚪 Logout";
+
+        logoutButton.addEventListener("click", () => logout());
+
+        actions.append(myBlogs, logoutButton);
+
+        container.append(avatar, name, details, actions);
+
+    } catch (error) {
+
+        container.textContent = "Unable to load profile: " + error.message;
+
+    }
+
+}
+
+showProfile();
+
+
+// =====================================
+// 9. SEARCH AND CATEGORY FILTER (Dashboard)
 // =====================================
 
 const searchInput = document.querySelector("#search-input");

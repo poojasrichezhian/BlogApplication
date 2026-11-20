@@ -16,6 +16,11 @@ The application uses a frontend built with HTML, CSS, and JavaScript, connected 
 - Edit and delete buttons (shown only to the blog's author).
 - Search blogs by title or content.
 - Blog categories with a category filter on the dashboard.
+- Private pages (Dashboard, Create Blog, Profile) that require login.
+- Dashboard shows only the logged-in user's blogs; Home shows all blogs.
+- User profile page (name, email, joined date, number of blogs).
+- Logout, and a navigation menu that changes based on login status.
+- Automatic logout when the login session (JWT) expires.
 - Create and publish new blog posts.
 - User-friendly interface.
 - Integration with backend APIs.
@@ -28,6 +33,9 @@ The application uses a frontend built with HTML, CSS, and JavaScript, connected 
 - API to retrieve all blog posts, with optional search and category filters.
 - API to retrieve a single blog by ID.
 - Update and delete APIs (only the blog's author can change it).
+- Shared JWT authentication middleware.
+- API to get only the logged-in user's blogs.
+- Profile API for the logged-in user (password is never returned).
 - MongoDB Atlas database with Mongoose models (User, Blog).
 - Secrets stored in environment variables (.env).
 - Input validation and error handling.
@@ -63,6 +71,7 @@ BlogApplication/
 ├── dashboard.html
 ├── create.html
 ├── blog-details.html
+├── profile.html
 ├── styles.css
 ├── app.js
 ├── README.md
@@ -71,6 +80,9 @@ BlogApplication/
 └── backend/
     ├── config/
     │   └── db.js
+    │
+    ├── middleware/
+    │   └── auth.js
     │
     ├── models/
     │   ├── User.js
@@ -158,7 +170,9 @@ The frontend communicates with the backend running at `http://localhost:5000`.
 | GET | `/api/test` | Test backend API | Not required |
 | POST | `/api/auth/register` | Register a new user | Not required |
 | POST | `/api/auth/login` | Log in an existing user | Not required |
+| GET | `/api/auth/me` | Get the logged-in user's profile | JWT required |
 | GET | `/api/blogs` | Retrieve all blogs (optional `?search=` and `?category=`) | Not required |
+| GET | `/api/blogs/my` | Retrieve only the logged-in user's blogs | JWT required |
 | POST | `/api/blogs` | Create a new blog | JWT required |
 | GET | `/api/blogs/:id` | Retrieve a single blog by ID | Not required |
 | PUT | `/api/blogs/:id` | Update a blog (author only) | JWT required |
@@ -173,6 +187,9 @@ Available blog categories: General, Technology, Travel, Food, Lifestyle, Educati
 - The frontend stores the authentication token in browser Local Storage.
 - Protected blog creation requests include the JWT token in the Authorization header.
 - Users without a valid token cannot create blog posts.
+- The token expires after 1 hour; the website then logs the user out automatically.
+- Dashboard, Create Blog and Profile pages redirect to Login when the user is not logged in.
+- Logout removes the token and user details from Local Storage.
 
 ## Testing
 
@@ -200,6 +217,10 @@ The following functionalities have been tested successfully:
 - Edit and delete buttons hidden for blogs written by other users.
 - Creating blogs with categories.
 - Searching blogs and filtering by category.
+- Dashboard shows only the logged-in user's blogs.
+- Profile page shows the correct user details and blog count.
+- Logout clears the session and updates the menu.
+- Private pages redirect to Login when the user is not logged in.
 
 ## Current Limitations
 
@@ -208,8 +229,7 @@ The following functionalities have been tested successfully:
 
 ## Future Enhancements
 
-- User profile management.
-- Logout functionality.
+- Edit profile details and change password.
 - Deployment of the frontend and backend.
 
 ## Author
