@@ -360,3 +360,39 @@ button:hover {
 }
 
 
+
+/* ===== Blog Details page & Read more link (Module 03) ===== */
+.post-grid .card h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-grid .card h2 a:hover {
+  text-decoration: underline;
+}
+
+.read-more {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.read-more:hover {
+  text-decoration: underline;
+}
+
+.blog-details {
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.blog-details h1 {
+  margin: 1rem 0 0.5rem;
+}
+
+.blog-content {
+  margin-top: 1.25rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}

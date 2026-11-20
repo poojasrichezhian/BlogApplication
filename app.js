@@ -140,7 +140,14 @@ async function showPosts() {
 
             const title = document.createElement("h2");
 
-            title.textContent = post.title;
+            // Title links to the Blog Details page
+            const titleLink = document.createElement("a");
+
+            titleLink.href = "blog-details.html?id=" + post._id;
+
+            titleLink.textContent = post.title;
+
+            title.append(titleLink);
 
 
             const date = document.createElement("small");
@@ -159,12 +166,22 @@ async function showPosts() {
             author.textContent = "By " + post.author;
 
 
+            const readMore = document.createElement("a");
+
+            readMore.className = "read-more";
+
+            readMore.href = "blog-details.html?id=" + post._id;
+
+            readMore.textContent = "Read more →";
+
+
             article.append(
                 image,
                 title,
                 date,
                 content,
-                author
+                author,
+                readMore
             );
 
             container.append(article);
@@ -250,7 +267,97 @@ if (createForm) {
 
 
 // =====================================
-// 4. LOAD BLOGS WHEN PAGE OPENS
+// 4. SHOW ONE BLOG (Blog Details page)
+// =====================================
+
+async function showBlogDetails() {
+
+    const container = document.querySelector("#blog-details");
+
+    if (!container) return;
+
+    // Read the blog ID from the page address, e.g. blog-details.html?id=abc123
+    const blogId = new URLSearchParams(window.location.search).get("id");
+
+    if (!blogId) {
+
+        container.textContent = "No blog selected.";
+
+        return;
+    }
+
+    container.textContent = "Loading blog...";
+
+    try {
+
+        const response = await fetch(API_URL + "/blogs/" + blogId);
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message);
+        }
+
+        const post = data.blog;
+
+        container.innerHTML = "";
+
+        document.title = post.title + " | My Blog";
+
+        const image = document.createElement("img");
+
+        image.className = "post-image";
+
+        image.src =
+            `https://picsum.photos/seed/${encodeURIComponent(post.title)}/800/450`;
+
+        image.alt = "Decorative blog cover";
+
+
+        const title = document.createElement("h1");
+
+        title.textContent = post.title;
+
+
+        const meta = document.createElement("small");
+
+        meta.textContent =
+            "By " + post.author + " · " +
+            new Date(post.createdAt).toLocaleDateString();
+
+
+        const content = document.createElement("p");
+
+        content.className = "blog-content";
+
+        content.textContent = post.content;
+
+
+        const back = document.createElement("a");
+
+        back.className = "read-more";
+
+        back.href = "dashboard.html";
+
+        back.textContent = "← Back to all blogs";
+
+
+        container.append(image, title, meta, content, back);
+
+    } catch (error) {
+
+        container.textContent =
+            "Unable to load blog: " + error.message;
+
+    }
+
+}
+
+
+// =====================================
+// 5. LOAD BLOGS WHEN PAGE OPENS
 // =====================================
 
 showPosts();
+
+showBlogDetails();

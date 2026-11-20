@@ -4,7 +4,7 @@
 
 The Blog Application is a responsive full-stack web application that allows users to register, log in, create blog posts, and view published blogs.
 
-The application uses a frontend built with HTML, CSS, and JavaScript, connected to a backend developed using Node.js and Express.js. JWT authentication is used to secure blog creation, and bcrypt.js is used for password hashing.
+The application uses a frontend built with HTML, CSS, and JavaScript, connected to a backend developed using Node.js and Express.js. All users and blog posts are stored permanently in a MongoDB Atlas cloud database using Mongoose. JWT authentication is used to secure blog creation, and bcrypt.js is used for password hashing.
 
 ## Features
 
@@ -12,6 +12,7 @@ The application uses a frontend built with HTML, CSS, and JavaScript, connected 
 - Responsive home page.
 - User registration and login pages.
 - Dashboard to view published blogs.
+- Blog details page to read a single blog.
 - Create and publish new blog posts.
 - User-friendly interface.
 - Integration with backend APIs.
@@ -22,6 +23,10 @@ The application uses a frontend built with HTML, CSS, and JavaScript, connected 
 - JWT-based authentication.
 - Protected blog creation endpoint.
 - API to retrieve all blog posts.
+- API to retrieve a single blog by ID.
+- Update and delete APIs (only the blog's author can change it).
+- MongoDB Atlas database with Mongoose models (User, Blog).
+- Secrets stored in environment variables (.env).
 - Input validation and error handling.
 
 ## Technologies Used
@@ -38,6 +43,11 @@ The application uses a frontend built with HTML, CSS, and JavaScript, connected 
 - bcrypt.js
 - JSON Web Token (JWT)
 - CORS
+- dotenv
+
+### Database
+- MongoDB Atlas
+- Mongoose
 
 ## Project Structure
 
@@ -49,12 +59,20 @@ BlogApplication/
 ├── register.html
 ├── dashboard.html
 ├── create.html
+├── blog-details.html
 ├── styles.css
 ├── app.js
 ├── README.md
 ├── .gitignore
 │
 └── backend/
+    ├── config/
+    │   └── db.js
+    │
+    ├── models/
+    │   ├── User.js
+    │   └── Blog.js
+    │
     ├── controllers/
     │   ├── authController.js
     │   └── blogController.js
@@ -64,6 +82,7 @@ BlogApplication/
     │   └── blogRoutes.js
     │
     ├── server.js
+    ├── .env            (not uploaded to GitHub)
     ├── package.json
     └── package-lock.json
 ```
@@ -94,7 +113,19 @@ Install the required dependencies:
 npm install
 ```
 
-### 4. Start the Backend Server
+### 4. Create the .env File
+
+Inside the `backend` folder, create a file named `.env`:
+
+```text
+PORT=5000
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster-address>/blogapp?retryWrites=true&w=majority
+JWT_SECRET=your_secret_key
+```
+
+Replace the values with your own MongoDB Atlas details. This file is listed in `.gitignore` and is never uploaded to GitHub.
+
+### 5. Start the Backend Server
 
 Run:
 
@@ -108,7 +139,9 @@ The backend server will start at:
 http://localhost:5000
 ```
 
-### 5. Run the Frontend
+You should also see `MongoDB connected successfully!` in the terminal.
+
+### 6. Run the Frontend
 
 Open the project folder in VS Code and launch `index.html` using the Live Server extension.
 
@@ -124,6 +157,9 @@ The frontend communicates with the backend running at `http://localhost:5000`.
 | POST | `/api/auth/login` | Log in an existing user | Not required |
 | GET | `/api/blogs` | Retrieve all blogs | Not required |
 | POST | `/api/blogs` | Create a new blog | JWT required |
+| GET | `/api/blogs/:id` | Retrieve a single blog by ID | Not required |
+| PUT | `/api/blogs/:id` | Update a blog (author only) | JWT required |
+| DELETE | `/api/blogs/:id` | Delete a blog (author only) | JWT required |
 
 ## Authentication
 
@@ -146,22 +182,25 @@ The following functionalities have been tested successfully:
 - Retrieving all blog posts.
 - Frontend and backend integration.
 - Protected blog creation without authentication.
+- MongoDB Atlas connection.
+- Users and blogs saved in MongoDB.
+- Duplicate email registration is rejected.
+- Passwords stored as bcrypt hashes in the database.
+- Retrieving a single blog by ID.
+- Invalid blog ID returns "Blog not found".
+- Blog details page in the browser.
+- Full website flow: register, login, create blog, view dashboard, view blog details.
 
 ## Current Limitations
 
-- User and blog data are temporarily stored in server-side arrays.
-- Data is lost when the backend server restarts.
-- A permanent database has not yet been integrated.
 - The backend must be running locally for frontend API requests to work.
 - The application is currently configured for local development.
 
 ## Future Enhancements
 
-- MongoDB database integration for permanent data storage.
-- Complete CRUD operations, including edit and delete.
+- Edit and delete buttons on the frontend (the APIs already exist).
 - User profile management.
 - Logout functionality.
-- Improved security using environment variables.
 - Deployment of the frontend and backend.
 
 ## Author

@@ -7,7 +7,10 @@ const { SECRET } = require("../controllers/authController");
 
 const {
     createBlog,
-    getBlogs
+    getBlogs,
+    getBlogById,
+    updateBlog,
+    deleteBlog
 } = require("../controllers/blogController");
 
 // Authentication Middleware
@@ -37,5 +40,14 @@ router.get("/", getBlogs);
 
 // Create a blog (Login required)
 router.post("/", auth, createBlog);
+
+// Get one blog by ID
+router.get("/:id", getBlogById);
+
+// Update a blog (Login required, author only)
+router.put("/:id", auth, updateBlog);
+
+// Delete a blog (Login required, author only)
+router.delete("/:id", auth, deleteBlog);
 
 module.exports = router;

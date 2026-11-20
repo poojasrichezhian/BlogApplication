@@ -1,10 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-// Temporary user storage
-let users = [];
-
-const SECRET = "blog_application_secret_key";
+// JWT secret comes from the .env file
+const SECRET = process.env.JWT_SECRET || "blog_application_secret_key";
 
 // User Registration
 const registerUser = async (req, res) => {
@@ -18,9 +17,10 @@ const registerUser = async (req, res) => {
             });
         }
 
-        const existingUser = users.find(
-            user => user.email === email
-        );
+        // Check MongoDB for a user with the same email
+        const existingUser = await User.findOne({
+            email: email.toLowerCase()
+        });
 
         if (existingUser) {
             return res.status(409).json({
@@ -31,20 +31,18 @@ const registerUser = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = {
-            id: Date.now().toString(),
+        // Save the new user in MongoDB
+        const newUser = await User.create({
             name,
             email,
             password: hashedPassword
-        };
-
-        users.push(newUser);
+        });
 
         res.status(201).json({
             success: true,
             message: "Registration successful!",
             user: {
-                id: newUser.id,
+                id: newUser._id,
                 name: newUser.name,
                 email: newUser.email
             }
@@ -72,9 +70,10 @@ const loginUser = async (req, res) => {
             });
         }
 
-        const user = users.find(
-            user => user.email === email
-        );
+        // Find the user in MongoDB
+        const user = await User.findOne({
+            email: email.toLowerCase()
+        });
 
         if (!user) {
             return res.status(401).json({
@@ -97,7 +96,7 @@ const loginUser = async (req, res) => {
 
         const token = jwt.sign(
             {
-                id: user.id,
+                id: user._id.toString(),
                 name: user.name
             },
             SECRET,
@@ -109,7 +108,7 @@ const loginUser = async (req, res) => {
             message: "Login successful!",
             token,
             user: {
-                id: user.id,
+                id: user._id,
                 name: user.name,
                 email: user.email
             }
@@ -128,6 +127,5 @@ const loginUser = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
-    users,
     SECRET
 };
