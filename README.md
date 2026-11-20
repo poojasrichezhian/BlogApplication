@@ -2,7 +2,7 @@
 
 ## Live Demo
 
-- **Website (frontend):** _Vercel link will be added here_
+- **Website (frontend):** https://poojasri-blog-app.onrender.com
 - **Backend API:** https://blogapplication-hec0.onrender.com
 - **Example API:** https://blogapplication-hec0.onrender.com/api/blogs
 
@@ -166,7 +166,7 @@ You should also see `MongoDB connected successfully!` in the terminal.
 
 ### 6. Run the Frontend
 
-Open the project folder in VS Code and launch `index.html` using the Live Server extension.
+Open `index.html` in your browser (or use the VS Code Live Server extension).
 
 The frontend communicates with the backend running at `http://localhost:5000`.
 
