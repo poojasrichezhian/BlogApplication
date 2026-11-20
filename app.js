@@ -1,4 +1,10 @@
-const API_URL = "http://localhost:5000/api";
+// Local computer -> use the local backend
+// Live website   -> use the deployed backend on Render
+const isLocal = ["localhost", "127.0.0.1", ""].includes(window.location.hostname);
+
+const API_URL = isLocal
+    ? "http://localhost:5000/api"
+    : "https://blogapplication-hec0.onrender.com/api";
 
 
 // =====================================

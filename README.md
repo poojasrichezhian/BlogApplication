@@ -1,5 +1,13 @@
 # Blog Application
 
+## Live Demo
+
+- **Website (frontend):** _Vercel link will be added here_
+- **Backend API:** https://blogapplication-hec0.onrender.com
+- **Example API:** https://blogapplication-hec0.onrender.com/api/blogs
+
+> The backend uses Render's free plan, so the first request after a period of inactivity can take up to about a minute.
+
 ## About the Project
 
 The Blog Application is a responsive full-stack web application that allows users to register, log in, create blog posts, and view published blogs.
@@ -230,7 +238,6 @@ The following functionalities have been tested successfully:
 ## Future Enhancements
 
 - Edit profile details and change password.
-- Deployment of the frontend and backend.
 
 ## Author
 
