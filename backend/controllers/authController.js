@@ -100,7 +100,7 @@ const loginUser = async (req, res) => {
                 name: user.name
             },
             SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "1d" }
         );
 
         res.status(200).json({

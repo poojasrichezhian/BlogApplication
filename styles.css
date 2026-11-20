@@ -535,3 +535,30 @@ select:focus {
 .logout-link {
   color: #e5484d !important;
 }
+
+/* ===== Mobile polish (Module 06) ===== */
+.blog-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .blog-details,
+  .profile-card {
+    margin: 1rem auto;
+  }
+
+  .profile-details {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .profile-details dd {
+    margin-bottom: 0.75rem;
+  }
+
+  .blog-actions a,
+  .blog-actions button {
+    flex: 1;
+    text-align: center;
+  }
+}

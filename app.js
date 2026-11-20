@@ -133,6 +133,13 @@ function updateNavigation() {
 
 updateNavigation();
 
+// Already logged in? Login and Register pages are not needed
+if (document.querySelector(".demo-auth") && isLoggedIn()) {
+
+    window.location.replace("dashboard.html");
+
+}
+
 
 // =====================================
 // 1. USER REGISTRATION AND LOGIN
@@ -229,7 +236,7 @@ async function showPosts() {
 
     if (!container) return;
 
-    container.textContent = "Loading blogs...";
+    container.textContent = "Loading blogs... (the first load can take up to a minute while the server wakes up)";
 
     // Read the search box and category filter (if they exist on this page)
     const search = document.querySelector("#search-input")?.value.trim() || "";
@@ -359,8 +366,9 @@ async function showPosts() {
 
     } catch (error) {
 
-        container.textContent =
-            "Unable to load blogs: " + error.message;
+        container.textContent = error.message === "Failed to fetch"
+            ? "Cannot reach the server. Please try again in a minute."
+            : "Unable to load blogs: " + error.message;
 
     }
 
